@@ -1,0 +1,47 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+#
+# Process the given files and output one big merged gpx
+#
+
+use XML::Twig;
+
+sub handle_trk_name {
+    my ($twig, $e) = @_;
+
+    printf("trk/name: %s\n", $e->text());
+}
+
+sub handle_trkseg {
+    my ($twig, $e) = @_;
+
+    printf("trkseg\n");
+}
+
+sub handle_trkpt {
+    my ($twig, $e) = @_;
+
+    printf("trkpt: %s %s %s %s\n",
+        $e->{'att'}->{'lat'},
+        $e->{'att'}->{'lon'},
+        $e->first_child('ele')->text(),
+        $e->first_child('time')->text(),
+    );
+    $e->purge();
+}
+
+for my $file (@ARGV) {
+    printf("file: %s\n",$file);
+    my $twig = XML::Twig->new(
+            start_tag_handlers => {
+                trkseg => \&handle_trkseg,
+            },
+            twig_handlers => {
+                'trk/name' => \&handle_trk_name,
+                trkpt => \&handle_trkpt,
+            },
+    );
+    $twig->parsefile($file);
+}
+
