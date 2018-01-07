@@ -36,7 +36,7 @@ sub _add_split {
 }
 
 # Return the split bucket that the given timestamp is found in
-sub lookup {
+sub _lookup_bucket {
     my $self = shift;
     my $timestamp = shift;
 
