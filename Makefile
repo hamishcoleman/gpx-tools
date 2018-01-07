@@ -14,7 +14,7 @@ all:
 	test
 
 build-dep:
-	apt get install libxml-twig-perl
+	apt install libxml-twig-perl libtext-csv-perl libdevel-cover-perl
 
 install: clean
 	mkdir -p $(INSTALLBIN)
