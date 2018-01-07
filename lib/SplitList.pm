@@ -3,7 +3,8 @@ package SplitList;
 # Keep a list of timestamps to perform splits on
 #
 
-use List::MoreUtils qw( firstidx lastidx );
+use List::MoreUtils qw( lastidx );
+use HC::Strptime;
 
 sub new {
     my $class = shift;
@@ -33,6 +34,19 @@ sub _add_split {
     push @{$self->{index}}, $timestamp;
     push @{$self->{entry}}, $entry;
     return 1;
+}
+
+# Adds a new split entry, expecting a string for the timestamp
+# (TODO - expect an output object for the blob)
+sub add_split {
+    my $self = shift;
+    my $timestamp_str = shift;
+    my $entry = shift;
+
+    my $dt = HC::Strptime->format()->parse_datetime($timestamp_str);
+    return undef if (!defined($dt));
+
+    return $self->_add_split($dt->epoch(),$entry);
 }
 
 # Return the split bucket that the given timestamp is found in

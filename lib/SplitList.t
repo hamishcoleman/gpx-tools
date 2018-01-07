@@ -19,3 +19,6 @@ is($sl->_lookup_bucket(17), 'test15', 'test15 (should fail cache of test10)');
 is($sl->_lookup_bucket(20), 'test20', 'start of test20 (should fail cache of test10');
 is($sl->_lookup_bucket(21), 'test20', 'test20 (should use cache with no max ts)');
 
+is($sl->add_split('2017-02-02T01:00:00+10','dt1'), 1);
+is($sl->add_split('2017-02-02T01:00:00Z','dt2'), 1);
+is($sl->add_split('enotatime','foo'), undef);
