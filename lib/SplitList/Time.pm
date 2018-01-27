@@ -83,4 +83,14 @@ sub _lookup_bucket {
     return $self->{entry}[$idx];
 }
 
+sub lookup_bucket {
+    my $self = shift;
+    my $timestamp_str = shift;
+
+    my $dt = HC::Strptime->format()->parse_datetime($timestamp_str);
+    return undef if (!defined($dt));
+
+    return $self->_lookup_bucket($dt->epoch());
+}
+
 1;

@@ -34,5 +34,9 @@ is($sl->add_split('2017-02-02T01:00:00+10','dt1'), 1);
 is($sl->{cache}{min}, undef, 'cache cleared by add_split');
 is($sl->add_split('2017-02-02T01:00:00Z','dt2'), 1);
 
+is($sl->lookup_bucket('2017-02-01T14:00:00Z'), 'test20');
+is($sl->lookup_bucket('2017-02-01T15:00:00Z'), 'dt1');
+is($sl->lookup_bucket('2017-02-02T02:00:00Z'), 'dt2');
+
 # an unparseable time string
 is($sl->add_split('enotatime','foo'), undef);
