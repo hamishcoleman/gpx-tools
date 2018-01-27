@@ -1,10 +1,11 @@
 
 use Test::More 'no_plan';
 
-use_ok('SplitList');
+my $class = 'SplitList::Time';
+use_ok($class);
 
 my $sl = SplitList->new();
-isa_ok($sl,'SplitList');
+isa_ok($sl,$class);
 
 is($sl->_add_split(10,'test10'), 1);
 is($sl->_add_split(5,'test5'), undef, "Adding out-of-order should fail");
