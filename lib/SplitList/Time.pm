@@ -1,4 +1,4 @@
-package SplitList;
+package SplitList::Time;
 #
 # Keep a list of timestamps to perform splits on
 #
