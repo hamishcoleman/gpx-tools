@@ -33,6 +33,10 @@ sub _add_split {
 
     push @{$self->{index}}, $timestamp;
     push @{$self->{entry}}, $entry;
+
+    # adding a new entry might invalidate any cache, thus:.
+    delete $self->{cache};
+
     return 1;
 }
 
@@ -54,7 +58,7 @@ sub _lookup_bucket {
     my $self = shift;
     my $timestamp = shift;
 
-    if (defined($self->{cache})) {
+    if (defined($self->{cache}{min})) {
         # we can check against the the cached values
         my $ts_min = $self->{cache}{min};
         my $ts_max = $self->{cache}{max};

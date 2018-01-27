@@ -12,15 +12,25 @@ is($sl->_add_split(15,'test15'), 1);
 is($sl->_add_split(20,'test20'), 1);
 
 is($sl->_lookup_bucket(6), undef, 'cannot match anything');
+is($sl->{cache}{min}, undef, 'should have no cache');
 is($sl->_lookup_bucket(15), 'test15', 'start of test15 (no cache yet)');
+is($sl->{cache}{min}, 15, 'should have filled the cache');
 is($sl->_lookup_bucket(16), 'test15', 'test15 (should use cache of test15)');
+is($sl->{cache}{min}, 15, 'cache didnt change');
+is($sl->_lookup_bucket(16), 'test15', 'test15 (should use cache of test15)');
+is($sl->{cache}{min}, 15, 'cache didnt change');
 is($sl->_lookup_bucket(11), 'test10', 'test11 (should fail cache of test15)');
+is($sl->{cache}{min}, 10, 'cache changed');
 is($sl->_lookup_bucket(17), 'test15', 'test15 (should fail cache of test10)');
+is($sl->{cache}{min}, 15, 'cache changed');
 is($sl->_lookup_bucket(20), 'test20', 'start of test20 (should fail cache of test10');
+is($sl->{cache}{min}, 20, 'cache changed');
 is($sl->_lookup_bucket(21), 'test20', 'test20 (should use cache with no max ts)');
+is($sl->{cache}{min}, 20, 'cache didnt change');
 
 # two identical times, with different zones - to confirm the zones are working
 is($sl->add_split('2017-02-02T01:00:00+10','dt1'), 1);
+is($sl->{cache}{min}, undef, 'cache cleared by add_split');
 is($sl->add_split('2017-02-02T01:00:00Z','dt2'), 1);
 
 # an unparseable time string
