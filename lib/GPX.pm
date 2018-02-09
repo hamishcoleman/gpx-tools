@@ -30,14 +30,36 @@ sub _output_gpx_head {
     return $output;
 }
 
+sub _output_gpx_tail {
+    my ($self, $oldstate, $newstate) = @_;
+    my $output;
+    $output .= "</gpx>\n";
+
+    $self->{state} = "flush";
+
+    return $output;
+}
+
 sub _output_trk_head {
     my ($self, $oldstate, $newstate) = @_;
     my $output;
     $output .= " <trk>\n";
-    $output .= "  <name>" . $self->{trk}{name} . "</name>\n";
+    if (defined($self->{trk}{name})) {
+        $output .= "  <name>" . $self->{trk}{name} . "</name>\n";
+    }
 
     delete $self->{trk}{name};
     $self->{state} = $newstate;
+
+    return $output;
+}
+
+sub _output_trk_tail {
+    my ($self, $oldstate, $newstate) = @_;
+    my $output;
+    $output .= " </trk>\n";
+
+    $self->{state} = "have_gpx";
 
     return $output;
 }
@@ -52,15 +74,52 @@ sub _output_trkseg_head {
     return $output;
 }
 
+sub _output_trkseg_tail {
+    my ($self, $oldstate, $newstate) = @_;
+    my $output;
+    $output .= "  </trkseg>\n";
+
+    $self->{state} = "have_trk";
+
+    return $output;
+}
+
+sub _output_trkpt {
+    my ($self, $oldstate, $wantnewstate) = @_;
+    my $output;
+    $output = sprintf(
+        "   <trkpt lat=\"%s\" lon=\"%s\">\n" .
+        "    <ele>%s</ele>\n" .
+        "    <time>%s</time>\n" .
+        "   </trkpt>\n",
+        $self->{trk}{trkseg}{trkpt}{lat},
+        $self->{trk}{trkseg}{trkpt}{lon},
+        $self->{trk}{trkseg}{trkpt}{ele},
+        $self->{trk}{trkseg}{trkpt}{time},
+    );
+
+    $self->{state} = "have_trkseg";
+
+    return $output;
+}
+
 my $states = {
     'empty' => {
-        'have_trk_name' => \&_output_gpx_head,
+        'have_trk' => \&_output_gpx_head,
     },
-    'have_trk_name' => {
+    'have_gpx' => {
+        'flush' => \&_output_gpx_tail,
+    },
+    'have_trk' => {
         'have_trkseg' => \&_output_trk_head,
+        'flush'       => \&_output_trk_tail,
     },
     'have_trkseg' => {
         'have_trkpt' => \&_output_trkseg_head,
+        'flush'      => \&_output_trkseg_tail,
+    },
+    'have_trkpt' => {
+        'flush' => \&_output_trkpt,
     },
 };
 
@@ -92,7 +151,7 @@ sub _add_trk_name {
     my ($self,$name) = @_;
 
     $self->{trk}{name} = $name;
-    return $self->_state('have_trk_name');
+    return $self->_state('have_trk');
 }
 
 sub _add_trkseg {
@@ -105,11 +164,15 @@ sub _add_trkpt {
     # TODO - support trkpt extensions
 
     $self->{trk}{trkseg}{trkpt}{lat} = $lat;
-    $self->{trk}{trkseg}{trkpt}{lon} = $lat;
-    $self->{trk}{trkseg}{trkpt}{ele} = $lat;
-    $self->{trk}{trkseg}{trkpt}{time} = $lat;
+    $self->{trk}{trkseg}{trkpt}{lon} = $lon;
+    $self->{trk}{trkseg}{trkpt}{ele} = $ele;
+    $self->{trk}{trkseg}{trkpt}{time} = $time;
 
     return $self->_state('have_trkpt');
 }
 
+sub _flush {
+    my ($self) = @_;
+    return $self->_state('flush');
+}
 1;

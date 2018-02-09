@@ -27,3 +27,13 @@ is($obj->_add_trkseg(), $expect_trk_head);
 my $expect_trkseg_head = "  <trkseg>\n";
 
 is($obj->_add_trkpt('22.3','113.9',-22.45,'2018-01-19T14:01:33Z'), $expect_trkseg_head);
+
+my $expect_flush = "   <trkpt lat=\"22.3\" lon=\"113.9\">\n" .
+    "    <ele>-22.45</ele>\n" .
+    "    <time>2018-01-19T14:01:33Z</time>\n" .
+    "   </trkpt>\n" .
+    "  </trkseg>\n" .
+    " </trk>\n" .
+    "</gpx>\n";
+
+is($obj->_flush(), $expect_flush);
