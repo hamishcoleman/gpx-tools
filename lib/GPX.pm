@@ -107,7 +107,7 @@ sub _state {
     my ($self,$newstate) = @_;
 
     my $oldstate = $self->{state};
-    my $output;
+    my $output = '';
 
     # TODO - put a loop counter here
 
