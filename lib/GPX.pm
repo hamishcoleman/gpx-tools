@@ -69,7 +69,7 @@ sub _output_trkseg_head {
     my $output;
     $output .= "  <trkseg>\n";
 
-    $self->{state} = $newstate;
+    $self->{state} = 'in_trkseg';
 
     return $output;
 }
@@ -80,25 +80,6 @@ sub _output_trkseg_tail {
     $output .= "  </trkseg>\n";
 
     $self->{state} = "have_trk";
-
-    return $output;
-}
-
-sub _output_trkpt {
-    my ($self, $oldstate, $wantnewstate) = @_;
-    my $output;
-    $output = sprintf(
-        "   <trkpt lat=\"%s\" lon=\"%s\">\n" .
-        "    <ele>%s</ele>\n" .
-        "    <time>%s</time>\n" .
-        "   </trkpt>\n",
-        $self->{trk}{trkseg}{trkpt}{lat},
-        $self->{trk}{trkseg}{trkpt}{lon},
-        $self->{trk}{trkseg}{trkpt}{ele},
-        $self->{trk}{trkseg}{trkpt}{time},
-    );
-
-    $self->{state} = "have_trkseg";
 
     return $output;
 }
@@ -115,11 +96,10 @@ my $states = {
         'flush'       => \&_output_trk_tail,
     },
     'have_trkseg' => {
-        'have_trkpt' => \&_output_trkseg_head,
-        'flush'      => \&_output_trkseg_tail,
+        'in_trkseg' => \&_output_trkseg_head,
     },
-    'have_trkpt' => {
-        'flush' => \&_output_trkpt,
+    'in_trkseg' => {
+        'flush'      => \&_output_trkseg_tail,
     },
 };
 
@@ -143,6 +123,7 @@ sub _state {
         $output .= $states->{$oldstate}{$newstate}($self, $oldstate, $newstate);
         $oldstate = $self->{state};
     }
+
     return $output;
 }
 
@@ -163,12 +144,25 @@ sub _add_trkpt {
     my ($self, $lat, $lon, $ele, $time) = @_;
     # TODO - support trkpt extensions
 
-    $self->{trk}{trkseg}{trkpt}{lat} = $lat;
-    $self->{trk}{trkseg}{trkpt}{lon} = $lon;
-    $self->{trk}{trkseg}{trkpt}{ele} = $ele;
-    $self->{trk}{trkseg}{trkpt}{time} = $time;
+    my $output;
 
-    return $self->_state('have_trkpt');
+    # As this is a terminal state (it doesnt open any new state)
+    # we first ensure that we are in the needed starting state
+    $output .= $self->_state('in_trkseg');
+
+    # and then output the data immediately
+    $output .= sprintf(
+        "   <trkpt lat=\"%s\" lon=\"%s\">\n" .
+        "    <ele>%s</ele>\n" .
+        "    <time>%s</time>\n" .
+        "   </trkpt>\n",
+        $lat,
+        $lon,
+        $ele,
+        $time,
+    );
+
+    return $output;
 }
 
 sub _flush {
