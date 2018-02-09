@@ -5,34 +5,46 @@ use strict;
 # Process the given files and output one big merged gpx
 #
 
+use File::Spec;
+
+# allow the libs to be in the bin dir
+use FindBin;
+use lib File::Spec->catdir($FindBin::RealBin,"lib");
+
 use XML::Twig;
+use GPX;
+
+# FIXME - globals
+my $gpx;
 
 sub handle_trk_name {
     my ($twig, $e) = @_;
 
-    printf("trk/name: %s\n", $e->text());
+    print($gpx->_add_trk_name($e->text()));
 }
 
 sub handle_trkseg {
     my ($twig, $e) = @_;
 
-    printf("trkseg\n");
+    print($gpx->_add_trkseg());
 }
 
 sub handle_trkpt {
     my ($twig, $e) = @_;
 
-    printf("trkpt: %s %s %s %s\n",
+    print($gpx->_add_trkpt(
         $e->{'att'}->{'lat'},
         $e->{'att'}->{'lon'},
         $e->first_child('ele')->text(),
         $e->first_child('time')->text(),
-    );
+    ));
+
     $e->purge();
 }
 
 for my $file (@ARGV) {
     printf("file: %s\n",$file);
+    $gpx = GPX->new();
     my $twig = XML::Twig->new(
             start_tag_handlers => {
                 trkseg => \&handle_trkseg,
@@ -43,5 +55,6 @@ for my $file (@ARGV) {
             },
     );
     $twig->parsefile($file);
+    print($gpx->_flush());
 }
 
