@@ -13,8 +13,11 @@ tarfile := $(NAME)-$(describe).tar.gz
 all:
 	test
 
+PACKAGES := libxml-twig-perl libtext-csv-perl libdevel-cover-perl
+PACKAGES += libio-string-perl
+
 build-dep:
-	apt install libxml-twig-perl libtext-csv-perl libdevel-cover-perl
+	apt install $(PACKAGES)
 
 install: clean
 	mkdir -p $(INSTALLBIN)
