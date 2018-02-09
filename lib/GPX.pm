@@ -36,6 +36,7 @@ sub _output_trk_head {
     $output .= " <trk>\n";
     $output .= "  <name>" . $self->{trk}{name} . "</name>\n";
 
+    delete $self->{trk}{name};
     $self->{state} = $newstate;
 
     return $output;
