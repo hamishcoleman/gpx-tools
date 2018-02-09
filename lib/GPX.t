@@ -23,3 +23,7 @@ my $expect_trk_head = " <trk>\n" .
     "  <name>larry</name>\n";
 
 is($obj->_add_trkseg(), $expect_trk_head);
+
+my $expect_trkseg_head = "  <trkseg>\n";
+
+is($obj->_add_trkpt('22.3','113.9',-22.45,'2018-01-19T14:01:33Z'), $expect_trkseg_head);
