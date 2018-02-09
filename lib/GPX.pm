@@ -25,7 +25,7 @@ sub _output_gpx_head {
     $output .= " xmlns=\"http://www.topografix.com/GPX/1/1\"\n";
     $output .= " xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n";
 
-    $self->{state} = $newstate;
+    $self->{state} = 'in_gpx';
 
     return $output;
 }
@@ -49,7 +49,7 @@ sub _output_trk_head {
     }
 
     delete $self->{trk}{name};
-    $self->{state} = $newstate;
+    $self->{state} = 'in_trk';
 
     return $output;
 }
@@ -59,7 +59,7 @@ sub _output_trk_tail {
     my $output;
     $output .= " </trk>\n";
 
-    $self->{state} = "have_gpx";
+    $self->{state} = "in_gpx";
 
     return $output;
 }
@@ -79,27 +79,25 @@ sub _output_trkseg_tail {
     my $output;
     $output .= "  </trkseg>\n";
 
-    $self->{state} = "have_trk";
+    $self->{state} = "in_trk";
 
     return $output;
 }
 
 my $states = {
     'empty' => {
-        'have_trk' => \&_output_gpx_head,
+        'in_gpx' => \&_output_gpx_head,
     },
-    'have_gpx' => {
-        'flush' => \&_output_gpx_tail,
+    'in_gpx' => {
+        'in_trk' => \&_output_trk_head,
+        'flush'  => \&_output_gpx_tail,
     },
-    'have_trk' => {
-        'have_trkseg' => \&_output_trk_head,
-        'flush'       => \&_output_trk_tail,
-    },
-    'have_trkseg' => {
+    'in_trk' => {
         'in_trkseg' => \&_output_trkseg_head,
+        'flush'     => \&_output_trk_tail,
     },
     'in_trkseg' => {
-        'flush'      => \&_output_trkseg_tail,
+        'flush'       => \&_output_trkseg_tail,
     },
 };
 
@@ -132,12 +130,12 @@ sub _add_trk_name {
     my ($self,$name) = @_;
 
     $self->{trk}{name} = $name;
-    return $self->_state('have_trk');
+    return $self->_state('in_gpx');
 }
 
 sub _add_trkseg {
     my ($self) = @_;
-    return $self->_state('have_trkseg');
+    return $self->_state('in_trk');
 }
 
 sub _add_trkpt {
