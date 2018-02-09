@@ -1,4 +1,6 @@
 package SplitList::Time;
+use warnings;
+use strict;
 #
 # Keep a list of timestamps to perform splits on
 #
