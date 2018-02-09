@@ -30,13 +30,13 @@ is($sl->_lookup_bucket(21), 'test20', 'test20 (should use cache with no max ts)'
 is($sl->{cache}{min}, 20, 'cache didnt change');
 
 # two identical times, with different zones - to confirm the zones are working
-is($sl->add_split('2017-02-02T01:00:00+10','dt1'), 1);
+is($sl->add_split('2017-02-02T01:00:00+1000','dt1'), 1);
 is($sl->{cache}{min}, undef, 'cache cleared by add_split');
-is($sl->add_split('2017-02-02T01:00:00Z','dt2'), 1);
+is($sl->add_split('2017-02-02T01:00:00+0000','dt2'), 1);
 
-is($sl->lookup_bucket('2017-02-01T14:00:00Z'), 'test20');
-is($sl->lookup_bucket('2017-02-01T15:00:00Z'), 'dt1');
-is($sl->lookup_bucket('2017-02-02T02:00:00Z'), 'dt2');
+is($sl->lookup_bucket('2017-02-01T14:00:00+0000'), 'test20');
+is($sl->lookup_bucket('2017-02-01T15:00:00+0000'), 'dt1');
+is($sl->lookup_bucket('2017-02-02T02:00:00+0000'), 'dt2');
 
 # an unparseable time string
 is($sl->add_split('enotatime','foo'), undef);
