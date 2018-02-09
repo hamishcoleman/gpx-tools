@@ -97,7 +97,8 @@ my $states = {
         'flush'     => \&_output_trk_tail,
     },
     'in_trkseg' => {
-        'flush'       => \&_output_trkseg_tail,
+        'in_trk' => \&_output_trkseg_tail,
+        'flush'  => \&_output_trkseg_tail,
     },
 };
 
