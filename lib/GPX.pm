@@ -149,15 +149,19 @@ sub _add_trkpt {
     # we first ensure that we are in the needed starting state
     $output .= $self->_state('in_trkseg');
 
+    # You can get a GPS lock without enough details to get a height, so I
+    # assume that sometimes there is no ele tag
+    my $ele_tag = '';
+    if (defined($ele)) {
+        $ele_tag = "<ele>" . $ele . "</ele>";
+    }
+
     # and then output the data immediately
     $output .= sprintf(
-        "   <trkpt lat=\"%s\" lon=\"%s\">\n" .
-        "    <ele>%s</ele>\n" .
-        "    <time>%s</time>\n" .
-        "   </trkpt>\n",
+        "<trkpt lat=\"%s\" lon=\"%s\">%s<time>%s</time></trkpt>\n",
         $lat,
         $lon,
-        $ele,
+        $ele_tag,
         $time,
     );
 
