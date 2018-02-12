@@ -38,3 +38,37 @@ my $expect_flush =
     "</gpx>\n";
 
 is($obj->_flush(), $expect_flush);
+
+use XML::Twig;
+use IO::File;
+
+my $t = XML::Twig->new();
+
+$obj = $class->new();
+isa_ok($obj, $class);
+
+my $output;
+my $output_fh = IO::File->new(\$output,"w");
+
+ok($obj->output_file($output_fh));
+
+$t->parse('<name>larry</name>');
+ok($obj->add_trk_name($t->root()));
+is($output, $expect_gpx_head);
+
+$output = '';
+$output_fh->seek(0,0);
+$t->parse('<trkseg><foo>foo2</foo></trkseg>');
+ok($obj->add_trkseg($t->root()));
+is($output, $expect_trk_head);
+
+$output = '';
+$output_fh->seek(0,0);
+$t->parse('<trkpt lat="22.3" lon="113.9"><ele>-22.45</ele><time>2018-01-19T14:01:33Z</time></trkpt>');
+ok($obj->add_trkpt($t->root()));
+is($output, $expect_trkseg_head);
+
+$output = '';
+$output_fh->seek(0,0);
+ok($obj->flush());
+is($output, $expect_flush);

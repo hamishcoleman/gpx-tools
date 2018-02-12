@@ -172,4 +172,44 @@ sub _flush {
     my ($self) = @_;
     return $self->_state('flush');
 }
+
+####
+# an XML::Elt interface - which can be called from handler functions
+
+sub output_file {
+    my ($self, $fh) = @_;
+    $self->{fh} = $fh;
+    return 1;
+}
+
+sub add_trk_name {
+    my ($self, $elt) = @_;
+
+    $self->{fh}->print($self->_add_trk_name($elt->text()));
+}
+
+sub add_trkseg {
+    my ($self, $elt) = @_;
+
+    $self->{fh}->print($self->_add_trkseg());
+}
+
+sub add_trkpt {
+    my ($self, $elt) = @_;
+
+    # FIXME - is the ele tag optional?
+    $self->{fh}->print($self->_add_trkpt(
+        $elt->{'att'}->{'lat'},
+        $elt->{'att'}->{'lon'},
+        $elt->first_child('ele')->text(),
+        $elt->first_child('time')->text(),
+    ));
+}
+
+sub flush {
+    my ($self) = @_;
+
+    $self->{fh}->print($self->_flush());
+}
+
 1;
