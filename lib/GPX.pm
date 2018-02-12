@@ -93,10 +93,12 @@ my $states = {
         'flush'  => \&_output_gpx_tail,
     },
     'in_trk' => {
+        'in_gpx'    => \&_output_trk_tail,
         'in_trkseg' => \&_output_trkseg_head,
         'flush'     => \&_output_trk_tail,
     },
     'in_trkseg' => {
+        'in_gpx' => \&_output_trkseg_tail,
         'in_trk' => \&_output_trkseg_tail,
         'flush'  => \&_output_trkseg_tail,
     },
@@ -197,11 +199,16 @@ sub add_trkseg {
 sub add_trkpt {
     my ($self, $elt) = @_;
 
-    # FIXME - is the ele tag optional?
+    my $ele_text;
+    my $ele = $elt->first_child('ele');
+    if (defined($ele)) {
+        $ele_text = $ele->text();
+    }
+
     $self->{fh}->print($self->_add_trkpt(
         $elt->{'att'}->{'lat'},
         $elt->{'att'}->{'lon'},
-        $elt->first_child('ele')->text(),
+        $ele_text,
         $elt->first_child('time')->text(),
     ));
 }
