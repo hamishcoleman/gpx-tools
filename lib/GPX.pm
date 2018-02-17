@@ -239,4 +239,48 @@ sub flush {
     $self->{fh}->print($self->_flush());
 }
 
+sub _output_graphviz {
+    use Scalar::Util qw(refaddr);
+
+    # Create a back-ref index of the transition names
+    my $transitions_ref;
+    for my $transition_name (keys(%{$transitions})) {
+        my $transition = $transitions->{$transition_name};
+        $transitions_ref->{refaddr($transition)} = $transition_name;
+    }
+
+    print("# Automatically generated state diagram\n");
+    print("#\n");
+    print("digraph g {\n");
+    print("\n");
+
+    print("# state names\n");
+    for my $state (sort(keys(%{$states}))) {
+        print("    $state;\n");
+    }
+    print("\n");
+    print("# state transitions\n");
+    while (my ($name, $state) = each(%{$states})) {
+        my $seen;
+        for my $transition (values(%{$state})) {
+            my $newstate = $transition->{newstate};
+            next if (defined($seen->{$newstate}));
+            my $transition_name = $transitions_ref->{refaddr($transition)};
+            print("    $name -> $newstate [label=\"$transition_name\"];\n");
+            $seen->{$newstate}++;
+        }
+    }
+
+    # TODO
+    # - figure out a way to show the allowed end-state names for each
+    #   transition path.
+
+    print("}\n");
+}
+
+unless (caller) {
+    # only generate output if we are called as a CLI tool
+    _output_graphviz();
+}
+
 1;
