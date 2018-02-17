@@ -16,32 +16,8 @@ sub new {
     return $self;
 }
 
-sub _output_gpx_head {
-    my ($self, $oldstate, $newstate) = @_;
-    my $output;
-    $output .= "<gpx\n";
-    $output .= " creator=\"HC GPX.pm\"\n";
-    $output .= " version=\"1.1\"\n";
-    $output .= " xmlns=\"http://www.topografix.com/GPX/1/1\"\n";
-    $output .= " xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n";
-
-    $self->{state} = 'in_gpx';
-
-    return $output;
-}
-
-sub _output_gpx_tail {
-    my ($self, $oldstate, $newstate) = @_;
-    my $output;
-    $output .= "</gpx>\n";
-
-    $self->{state} = "flush";
-
-    return $output;
-}
-
 sub _output_trk_head {
-    my ($self, $oldstate, $newstate) = @_;
+    my ($self) = @_;
     my $output;
     $output .= " <trk>\n";
     if (defined($self->{trk}{name})) {
@@ -49,91 +25,88 @@ sub _output_trk_head {
     }
 
     delete $self->{trk}{name};
-    $self->{state} = 'in_trk';
 
     return $output;
 }
 
-sub _output_trk_tail {
-    my ($self, $oldstate, $newstate) = @_;
-    my $output;
-    $output .= " </trk>\n";
-
-    $self->{state} = "in_gpx";
-
-    return $output;
-}
-
-sub _output_trkseg_head {
-    my ($self, $oldstate, $newstate) = @_;
-    my $output;
-    $output .= "  <trkseg>\n";
-
-    $self->{state} = 'in_trkseg';
-
-    return $output;
-}
-
-sub _output_trkseg_tail {
-    my ($self, $oldstate, $newstate) = @_;
-    my $output;
-    $output .= "  </trkseg>\n";
-
-    $self->{state} = "in_trk";
-
-    return $output;
-}
-
-sub _set_state {
-    my ($self, $oldstate, $newstate) = @_;
-    $self->{state} = $newstate;
-    return '';
-}
-
-sub _set_state_in_gpx {
-    my ($self, $oldstate, $newstate) = @_;
-    $self->{state} = 'in_gpx';
-    return '';
-}
-
-sub _set_state_in_trkseg {
-    my ($self, $oldstate, $newstate) = @_;
-    $self->{state} = 'in_trkseg';
-    return '';
-}
+my $transitions = {
+    "<gpx>" => {
+        newstate => 'in_gpx',
+        string => <<"EOM",
+<gpx
+ creator="HC GPX.pm"
+ version="1.1"
+ xmlns="http://www.topografix.com/GPX/1/1"
+ xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+EOM
+    },
+    "</gpx>" => {
+        newstate => 'flush',
+        string => "</gpx>\n",
+    },
+    "<trk>" => {
+        newstate => 'in_trk',
+        fn => \&_output_trk_head,
+    },
+    "</trk>" => {
+        newstate => 'in_gpx',
+        string => " </trk>\n",
+    },
+    "<trkseg>" => {
+        newstate => 'in_trkseg',
+        string => "  <trkseg>\n",
+    },
+    "</trkseg>" => {
+        newstate => 'in_trk',
+        string => "  </trkseg>\n",
+    },
+    "to in_gpx" => {
+        newstate => 'in_gpx',
+    },
+    "to in_trkseg" => {
+        newstate => 'in_trkseg',
+    },
+    "to has_trkpt" => {
+        newstate => 'has_trkpt',
+    },
+    "to maybe_trk" => {
+        newstate => 'maybe_trk',
+    },
+};
 
 my $states = {
     'empty' => {
-        'in_gpx'    => \&_output_gpx_head,
-        'has_trkpt' => \&_output_gpx_head,
+        'in_gpx'    => $transitions->{'<gpx>'},
+        'has_trkpt' => $transitions->{'<gpx>'},
     },
     'in_gpx' => {
-        'has_trkpt' => \&_output_trk_head,
-        'maybe_trk' => \&_set_state,
-        'flush'     => \&_output_gpx_tail,
+        'has_trkpt' => $transitions->{'to maybe_trk'},
+        'maybe_trk' => $transitions->{'to maybe_trk'},
+        'flush'     => $transitions->{'</gpx>'},
     },
     'in_trk' => {
-        'in_gpx'    => \&_output_trk_tail,
-        'maybe_trk' => \&_output_trk_tail,
-        'has_trkpt' => \&_output_trkseg_head,
-        'flush'     => \&_output_trk_tail,
+        'in_gpx'    => $transitions->{'</trk>'},
+        'maybe_trk' => $transitions->{'</trk>'},
+        'has_trkpt' => $transitions->{'<trkseg>'},
+        'flush'     => $transitions->{'</trk>'},
     },
     'in_trkseg' => {
-        'in_gpx'    => \&_output_trkseg_tail,
-        'in_trk'    => \&_output_trkseg_tail,
-        'has_trkpt' => \&_set_state,
-        'flush'     => \&_output_trkseg_tail,
+        'in_gpx'    => $transitions->{'</trkseg>'},
+        'in_trk'    => $transitions->{'</trkseg>'},
+        'maybe_trk' => $transitions->{'</trkseg>'},
+        'has_trkpt' => $transitions->{'to has_trkpt'},
+        'flush'     => $transitions->{'</trkseg>'},
     },
     'has_trkpt' => {
-        'in_trkseg' => \&_set_state,
-        'maybe_trk' => \&_output_trkseg_tail,
-        'in_gpx'    => \&_output_trkseg_tail,
-        'flush'     => \&_set_state_in_trkseg,
+        'in_trkseg' => $transitions->{'to in_trkseg'},
+        'maybe_trk' => $transitions->{'to in_trkseg'},
+        'in_gpx'    => $transitions->{'to in_trkseg'},
+        'flush'     => $transitions->{'to in_trkseg'},
     },
     'maybe_trk' => {
-        'has_trkpt' => \&_output_trk_head,
-        'in_gpx'    => \&_set_state_in_gpx,
-        'flush'     => \&_set_state_in_gpx,
+        'has_trkpt' => $transitions->{'<trk>'},
+        'in_gpx'    => $transitions->{'to in_gpx'},
+        'flush'     => $transitions->{'to in_gpx'},
     },
 };
 
@@ -154,7 +127,20 @@ sub _state {
             die("Cannot transition from state $oldstate to $newstate");
         }
 
-        $output .= $states->{$oldstate}{$newstate}($self, $oldstate, $newstate);
+        my $transition = $states->{$oldstate}{$newstate};
+
+        if (defined($transition->{string})) {
+            $output .= $transition->{string};
+        }
+        if (defined($transition->{fn})) {
+            $output .= $transition->{fn}($self);
+        }
+        if (defined($transition->{newstate})) {
+            $self->{state} = $transition->{newstate};
+        } else {
+            $self->{state} = $newstate;
+        }
+
         $oldstate = $self->{state};
     }
 
