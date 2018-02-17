@@ -100,9 +100,9 @@ my $states = {
         'flush'     => \&_output_trk_tail,
     },
     'in_trkseg' => {
-        'in_gpx' => \&_output_trkseg_tail,
-        'in_trk' => \&_output_trkseg_tail,
-        'flush'  => \&_output_trkseg_tail,
+        'in_gpx'    => \&_output_trkseg_tail,
+        'in_trk'    => \&_output_trkseg_tail,
+        'flush'     => \&_output_trkseg_tail,
     },
 };
 
@@ -140,7 +140,7 @@ sub _add_trk_name {
 
 sub _add_trkseg {
     my ($self) = @_;
-    return $self->_state('in_trk');
+    return '';
 }
 
 sub _add_trkpt {

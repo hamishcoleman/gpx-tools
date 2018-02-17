@@ -1,3 +1,5 @@
+use warnings;
+use strict;
 
 use Test::More 'no_plan';
 
@@ -19,12 +21,12 @@ my $expect_gpx_head = "<gpx\n" .
 
 is($obj->_add_trk_name('larry'), $expect_gpx_head);
 
-my $expect_trk_head = " <trk>\n" .
-    "  <name>larry</name>\n";
 
-is($obj->_add_trkseg(), $expect_trk_head);
+is($obj->_add_trkseg(), '');
 
-my $expect_trkseg_head = "  <trkseg>\n" .
+my $expect_trkseg_head = " <trk>\n" .
+    "  <name>larry</name>\n" .
+    "  <trkseg>\n" .
     "<trkpt lat=\"22.3\" lon=\"113.9\"><ele>-22.45</ele><time>2018-01-19T14:01:33Z</time></trkpt>\n";
 
 is($obj->_add_trkpt('22.3','113.9',-22.45,'2018-01-19T14:01:33Z'), $expect_trkseg_head);
@@ -60,7 +62,7 @@ $output = '';
 $output_fh->seek(0,0);
 $t->parse('<trkseg><foo>foo2</foo></trkseg>');
 ok($obj->add_trkseg($t->root()));
-is($output, $expect_trk_head);
+is($output, '');
 
 $output = '';
 $output_fh->seek(0,0);
