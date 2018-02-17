@@ -1,0 +1,33 @@
+# TODO
+# - automatically generate this from the states table
+#       ( which will require a better design for the states table..)
+#
+
+digraph G {
+
+    empty -> in_gpx [label="_output_gpx_head"];
+    // empty -> has_trkpt; via _output_gpx_head
+
+    // in_gpx -> has_trkpt; via _output_trk_head
+    in_gpx -> maybe_trk [label="_set_state"];
+    in_gpx -> flush [label="_output_gpx_tail"];
+
+    in_trk -> in_gpx [label="_output_trk_tail"];
+    // in_trk -> maybe_trk via _output_trk_tail
+    in_trk -> has_trkpt [label="_output_trkseg_head"];
+    // in_trk -> flush; via _output_trk_tail
+
+    // in_trkseg -> in_gpx; via _output_trkseg_tail
+    in_trkseg -> in_trk [label="_output_trkseg_tail"];
+    in_trkseg -> has_trkpt [label="_set_state"];
+    // in_trkseg -> flush; via _output_trkseg_tail
+
+    has_trkpt -> in_trkseg [label="_set_state"];
+    // has_trkpt -> maybe_trk via _output_trkseg_tail
+    // has_trkpt -> in_gpx via _output_trkseg_tail
+    // has_trkpt -> flush; via _set_state_in_trkseg
+
+    maybe_trk -> in_trk [label="_output_trk_head"];
+    maybe_trk -> in_gpx [label="_set_state_in_gpx"];
+    // maybe_trk -> flush via _set_state_in_gpx
+}

@@ -84,25 +84,56 @@ sub _output_trkseg_tail {
     return $output;
 }
 
+sub _set_state {
+    my ($self, $oldstate, $newstate) = @_;
+    $self->{state} = $newstate;
+    return '';
+}
+
+sub _set_state_in_gpx {
+    my ($self, $oldstate, $newstate) = @_;
+    $self->{state} = 'in_gpx';
+    return '';
+}
+
+sub _set_state_in_trkseg {
+    my ($self, $oldstate, $newstate) = @_;
+    $self->{state} = 'in_trkseg';
+    return '';
+}
+
 my $states = {
     'empty' => {
         'in_gpx'    => \&_output_gpx_head,
-        'in_trkseg' => \&_output_gpx_head,
+        'has_trkpt' => \&_output_gpx_head,
     },
     'in_gpx' => {
-        'in_trk'    => \&_output_trk_head,
-        'in_trkseg' => \&_output_trk_head,
+        'has_trkpt' => \&_output_trk_head,
+        'maybe_trk' => \&_set_state,
         'flush'     => \&_output_gpx_tail,
     },
     'in_trk' => {
         'in_gpx'    => \&_output_trk_tail,
-        'in_trkseg' => \&_output_trkseg_head,
+        'maybe_trk' => \&_output_trk_tail,
+        'has_trkpt' => \&_output_trkseg_head,
         'flush'     => \&_output_trk_tail,
     },
     'in_trkseg' => {
         'in_gpx'    => \&_output_trkseg_tail,
         'in_trk'    => \&_output_trkseg_tail,
+        'has_trkpt' => \&_set_state,
         'flush'     => \&_output_trkseg_tail,
+    },
+    'has_trkpt' => {
+        'in_trkseg' => \&_set_state,
+        'maybe_trk' => \&_output_trkseg_tail,
+        'in_gpx'    => \&_output_trkseg_tail,
+        'flush'     => \&_set_state_in_trkseg,
+    },
+    'maybe_trk' => {
+        'has_trkpt' => \&_output_trk_head,
+        'in_gpx'    => \&_set_state_in_gpx,
+        'flush'     => \&_set_state_in_gpx,
     },
 };
 
@@ -140,7 +171,7 @@ sub _add_trk_name {
 
 sub _add_trkseg {
     my ($self) = @_;
-    return '';
+    return $self->_state('maybe_trk');
 }
 
 sub _add_trkpt {
@@ -150,8 +181,9 @@ sub _add_trkpt {
     my $output;
 
     # As this is a terminal state (it doesnt open any new state)
-    # we first ensure that we are in the needed starting state
-    $output .= $self->_state('in_trkseg');
+    # we first ensure that we are in the needed starting state.
+    # FIXME - this terminal state is starting to look like a hack.
+    $output .= $self->_state('has_trkpt');
 
     # You can get a GPS lock without enough details to get a height, so I
     # assume that sometimes there is no ele tag
