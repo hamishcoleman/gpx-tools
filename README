@@ -1,2 +1,9 @@
 This is a collection of tools that allows management and rendering of a
 collection of GPX files. 
+
+gpx_split
+    Given a "splitlist" file and a list of GPX files, split the input into
+    multiple output files.
+    This can be used to split daily gps log files into the "trips" they are
+    part of.
+
