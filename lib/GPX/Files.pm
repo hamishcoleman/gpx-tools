@@ -72,7 +72,7 @@ sub add_trkpt {
 
     # We had no match, use a bogus name
     if (!defined($gpxname)) {
-        $gpxname = "NONE";
+        $gpxname = "__NONE.gpx";
     }
 
     my $gpx = $self->_open($gpxname);

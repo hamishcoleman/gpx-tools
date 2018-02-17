@@ -117,8 +117,8 @@ sub parse_fd {
     }
 
     if (defined($prev_line)) {
-        if (!$self->add_split($prev_line, 'END')) {
-            warn("Unparseable entry: $prev_line, 'END'\n");
+        if (!$self->add_split($prev_line, '__END.gpx')) {
+            warn("Unparseable entry: $prev_line, '__END.gpx'\n");
         }
     }
 

@@ -62,7 +62,7 @@ ok($sl->parse_fd($fh));
 is_deeply($sl, {
     'entry' => [
         'trip-1',
-        'END'
+        '__END.gpx'
     ],
     'index' => [
         1485957600,
