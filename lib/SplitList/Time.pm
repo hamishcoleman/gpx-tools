@@ -95,4 +95,34 @@ sub lookup_bucket {
     return $self->_lookup_bucket($dt->epoch());
 }
 
+sub parse_fd {
+    my $self = shift;
+    my $fd = shift;
+
+    my $prev_line;
+    while(<$fd>) {
+        s/#.*//; # comments
+        s/^\s+//; # space at the beginning
+        s/\s+$//; # space at the end
+        next if (!$_); # skip anything that is now an empty line
+
+        if (defined($prev_line)) {
+            if (!$self->add_split($prev_line, $_)) {
+                warn("Unparseable entry: $prev_line, $_\n");
+            }
+            $prev_line = undef;
+        } else {
+            $prev_line = $_;
+        }
+    }
+
+    if (defined($prev_line)) {
+        if (!$self->add_split($prev_line, 'END')) {
+            warn("Unparseable entry: $prev_line, 'END'\n");
+        }
+    }
+
+    return 1;
+}
+
 1;

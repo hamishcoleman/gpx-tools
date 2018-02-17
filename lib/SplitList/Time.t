@@ -40,3 +40,36 @@ is($sl->lookup_bucket('2017-02-02T02:00:00Z'), 'dt2');
 
 # an unparseable time string
 is($sl->add_split('enotatime','foo'), undef);
+
+#
+use IO::File;
+
+my $input = <<"EOM";
+# Test input file
+2017-02-01T14:00:00Z
+    trip-1 # a comment
+enotatime # a bad date line
+    badline
+2017-02-01T18:00:00Z
+EOM
+
+my $fh = IO::File->new(\$input,"r");
+
+$sl = SplitList::Time->new();
+
+ok($sl->parse_fd($fh));
+
+is_deeply($sl, {
+                 'entry' => [
+                              'trip-1',
+                              'END'
+                            ],
+                 'index' => [
+                              1485957600,
+                              1485972000
+                            ]
+               }
+);
+
+use Data::Dumper;
+print STDERR Dumper($sl);
