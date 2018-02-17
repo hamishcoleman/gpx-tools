@@ -12,25 +12,34 @@ use FindBin;
 use lib File::Spec->catdir($FindBin::RealBin,"lib");
 
 use XML::Twig;
-use GPX;
+use IO::File;
+
+use SplitList::Time;
+use GPX::Files;
+
+my $splitlist = SplitList::Time->new();
+my $split_filename = shift @ARGV;
+my $split_fh = IO::File->new($split_filename, "r");
+$splitlist->parse_fd($split_fh);
+
+my $gpxfiles = GPX::Files->new();
+$gpxfiles->set_splitlist($splitlist);
 
 for my $file (@ARGV) {
     printf("file: %s\n",$file);
-    my $gpx = GPX->new();
-    $gpx->output_file(*STDOUT);
     my $twig = XML::Twig->new(
             start_tag_handlers => {
-                trkseg => sub {$gpx->add_trkseg()},
+                trkseg => sub {$gpxfiles->add_trkseg()},
             },
             twig_handlers => {
-                'trk/name' => sub {$gpx->add_trk_name($_[1])},
+                'trk/name' => sub {$gpxfiles->add_trk_name($_[1])},
                 trkpt => sub {
-                    $gpx->add_trkpt($_[1]);
+                    $gpxfiles->add_trkpt($_[1]);
                     $_[1]->purge();
                 },
             },
     );
     $twig->parsefile($file);
-    print($gpx->_flush());
 }
 
+$gpxfiles->flush();

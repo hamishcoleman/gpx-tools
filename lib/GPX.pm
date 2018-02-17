@@ -86,11 +86,13 @@ sub _output_trkseg_tail {
 
 my $states = {
     'empty' => {
-        'in_gpx' => \&_output_gpx_head,
+        'in_gpx'    => \&_output_gpx_head,
+        'in_trkseg' => \&_output_gpx_head,
     },
     'in_gpx' => {
-        'in_trk' => \&_output_trk_head,
-        'flush'  => \&_output_gpx_tail,
+        'in_trk'    => \&_output_trk_head,
+        'in_trkseg' => \&_output_trk_head,
+        'flush'     => \&_output_gpx_tail,
     },
     'in_trk' => {
         'in_gpx'    => \&_output_trk_tail,
