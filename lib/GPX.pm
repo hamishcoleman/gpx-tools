@@ -165,37 +165,34 @@ sub _add_trkpt {
     my ($self, $lat, $lon, $ele, $time) = @_;
     # TODO - support trkpt extensions
 
-    my $output;
+    my @output;
 
     # As this is a terminal state (it doesnt open any new state)
     # we first ensure that we are in the needed starting state.
     # FIXME - this terminal state is starting to look like a hack.
-    $output .= $self->_state('has_trkpt');
+    if ($self->{state} ne 'has_trkpt') {
+        # avoid making a sub call if we can
+        push @output, $self->_state('has_trkpt');
+    }
+
+    # and then output the data immediately
+    push @output, '<trkpt lat="', $lat, '" lon="', $lon, '">';
 
     # You can get a GPS lock without enough details to get a height, so I
     # assume that sometimes there is no ele tag
-    my $ele_tag = '';
     if (defined($ele)) {
-        $ele_tag = "<ele>" . $ele . "</ele>";
+        push @output, '<ele>', $ele, '</ele>';
     }
 
     # You can write a GPX file without time elements, which is naff, but has
     # happened
-    my $time_tag = '';
     if (defined($time)) {
-        $time_tag = "<time>" . $time . "</time>";
+        push @output, '<time>', $time, '</time>';
     }
 
-    # and then output the data immediately
-    $output .= sprintf(
-        "<trkpt lat=\"%s\" lon=\"%s\">%s%s</trkpt>\n",
-        $lat,
-        $lon,
-        $ele_tag,
-        $time_tag,
-    );
+    push @output, "</trkpt>\n";
 
-    return $output;
+    return @output;
 }
 
 sub _close_trkseg {
