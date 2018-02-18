@@ -76,6 +76,13 @@ sub add_trkpt {
     }
 
     my $gpx = $self->_open($gpxname);
+
+    if (defined($self->{prev_gpxname}) and $self->{prev_gpxname} ne $gpxname) {
+        $self->{prev_gpx}->close_trkseg();
+    }
+    $self->{prev_gpxname} = $gpxname;
+    $self->{prev_gpx} = $gpx;
+
     $gpx->add_trkpt($elt);
 }
 

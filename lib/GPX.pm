@@ -101,6 +101,7 @@ my $states = {
         'in_trkseg' => $transitions->{'to in_trkseg'},
         'maybe_trk' => $transitions->{'to in_trkseg'},
         'in_gpx'    => $transitions->{'to in_trkseg'},
+        'in_trk'    => $transitions->{'to in_trkseg'},
         'flush'     => $transitions->{'to in_trkseg'},
     },
     'maybe_trk' => {
@@ -190,6 +191,18 @@ sub _add_trkpt {
     return $output;
 }
 
+sub _close_trkseg {
+    my ($self) = @_;
+
+    # if we have a trkseg open, we want to close it
+    if ($self->{state} eq 'has_trkpt' or $self->{state} eq 'in_trkseg') {
+        return $self->_state('in_trk');
+    }
+
+    # otherwise, do nothing
+    return '';
+}
+
 sub _flush {
     my ($self) = @_;
     return $self->_state('flush');
@@ -231,6 +244,12 @@ sub add_trkpt {
         $ele_text,
         $elt->first_child('time')->text(),
     ));
+}
+
+sub close_trkseg {
+    my ($self, $elt) = @_;
+
+    $self->{fh}->print($self->_close_trkseg());
 }
 
 sub flush {
