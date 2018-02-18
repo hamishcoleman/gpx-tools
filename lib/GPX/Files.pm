@@ -67,8 +67,15 @@ sub add_trkpt {
     my $self = shift;
     my $elt = shift;    
 
-    my $time = $elt->first_child('time')->text();
-    my $gpxname = $self->{splitlist}->lookup_bucket($time);
+    my $gpxname;
+    my $time_elt = $elt->first_child('time');
+    if (!defined($time_elt)) {
+        # Er..  I dont really have anything to do here
+    } else {
+        my $time = $time_elt->text();
+
+        $gpxname = $self->{splitlist}->lookup_bucket($time);
+    }
 
     # We had no match, use a bogus name
     if (!defined($gpxname)) {

@@ -179,13 +179,20 @@ sub _add_trkpt {
         $ele_tag = "<ele>" . $ele . "</ele>";
     }
 
+    # You can write a GPX file without time elements, which is naff, but has
+    # happened
+    my $time_tag = '';
+    if (defined($time)) {
+        $time_tag = "<time>" . $time . "</time>";
+    }
+
     # and then output the data immediately
     $output .= sprintf(
-        "<trkpt lat=\"%s\" lon=\"%s\">%s<time>%s</time></trkpt>\n",
+        "<trkpt lat=\"%s\" lon=\"%s\">%s%s</trkpt>\n",
         $lat,
         $lon,
         $ele_tag,
-        $time,
+        $time_tag,
     );
 
     return $output;
@@ -238,11 +245,17 @@ sub add_trkpt {
         $ele_text = $ele->text();
     }
 
+    my $time_text;
+    my $time = $elt->first_child('time');
+    if (defined($time)) {
+        $time_text = $time->text();
+    }
+
     $self->{fh}->print($self->_add_trkpt(
         $elt->{'att'}->{'lat'},
         $elt->{'att'}->{'lon'},
         $ele_text,
-        $elt->first_child('time')->text(),
+        $time_text,
     ));
 }
 
