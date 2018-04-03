@@ -1,0 +1,3 @@
+
+# Ignore the code coverage report output dir
+cover_db
