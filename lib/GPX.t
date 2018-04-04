@@ -17,7 +17,7 @@ my $expect_gpx_head = "<gpx\n" .
     " creator=\"HC GPX.pm\"\n" .
     " version=\"1.1\"\n" .
     " xmlns=\"http://www.topografix.com/GPX/1/1\"\n" .
-    " xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n";
+    " >\n";
 
 is($obj->_add_trk_name('larry'), $expect_gpx_head);
 

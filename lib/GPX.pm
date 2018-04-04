@@ -37,7 +37,7 @@ my $transitions = {
  creator="HC GPX.pm"
  version="1.1"
  xmlns="http://www.topografix.com/GPX/1/1"
- xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+ >
 EOM
     },
     "</gpx>" => {
