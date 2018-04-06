@@ -74,3 +74,7 @@ $output = '';
 $output_fh->seek(0,0);
 ok($obj->flush());
 is($output, $expect_flush);
+
+# TODO
+# - decide if I should be checking the output of the state transitions.
+ok(defined(GPX->_output_graphviz()));
