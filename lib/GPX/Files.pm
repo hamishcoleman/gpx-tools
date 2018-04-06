@@ -43,24 +43,36 @@ sub set_splitlist {
 
 sub add_trkseg {
     my $self = shift;
+    my $return = $self;
     for my $gpx (values(%{$self->{gpx}})) {
-        $gpx->add_trkseg();
+        if (! $gpx->add_trkseg() ) {
+            $return = undef;
+        }
     }
+    return $return;
 }
 
 sub add_trk_name {
     my $self = shift;
     my $elt = shift;
+    my $return = $self;
     for my $gpx (values(%{$self->{gpx}})) {
-        $gpx->add_trk_name($elt);
+        if (! $gpx->add_trk_name($elt) ) {
+            $return = undef;
+        }
     }
+    return $return;
 }
 
 sub flush {
     my $self = shift;
+    my $return = $self;
     for my $gpx (values(%{$self->{gpx}})) {
-        $gpx->flush();
+        if (! $gpx->flush() ) {
+            $return = undef;
+        }
     }
+    return $return;
 }
 
 sub add_trkpt {
