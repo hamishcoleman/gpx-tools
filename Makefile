@@ -34,7 +34,7 @@ clean:
 
 cover:
 	cover -delete
-	-COVER=true $(MAKE) test 2>&1 |grep -v "Specio::"
+	COVER=true $(MAKE) test
 	cover
 
 test:
