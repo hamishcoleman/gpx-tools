@@ -27,6 +27,19 @@ $gpxfiles->set_splitlist($splitlist);
 
 for my $file (@ARGV) {
     printf("file: %s\n",$file);
+
+    my $fh;
+    if ( $file =~ m/\.gz$/ ) {
+        $fh = IO::File->new("gzip -dc <'$file' |");
+    } elsif ( $file =~ m/\.xz$/ ) {
+        $fh = IO::File->new("xz -dc <'$file' |");
+    } else {
+        $fh = IO::File->new($file,"r");
+    }
+    if (!defined $fh) {
+        die "could not open $file: $!";
+    }
+
     my $twig = XML::Twig->new(
             start_tag_handlers => {
                 trkseg => sub {$gpxfiles->add_trkseg()},
@@ -39,7 +52,7 @@ for my $file (@ARGV) {
                 },
             },
     );
-    $twig->parsefile($file);
+    $twig->parse($fh);
 }
 
 $gpxfiles->flush();
