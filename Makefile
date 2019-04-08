@@ -17,6 +17,7 @@ PACKAGES := libxml-twig-perl libtext-csv-perl libdevel-cover-perl
 PACKAGES += libio-string-perl
 
 build_dep:
+	git submodule update --init
 	apt-get install -y $(PACKAGES)
 
 install: clean
