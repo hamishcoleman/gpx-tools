@@ -16,6 +16,7 @@ all:
 PACKAGES := libxml-twig-perl libtext-csv-perl libdevel-cover-perl
 PACKAGES += libio-string-perl
 PACKAGES += libdatetime-format-strptime-perl
+PACKAGES += liblist-moreutils-perl
 
 build_dep:
 	git submodule update --init
