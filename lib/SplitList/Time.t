@@ -41,6 +41,11 @@ is($sl->lookup_bucket('2017-02-02T02:00:00Z'), 'dt2');
 # an unparseable time string
 is($sl->add_split('enotatime','foo'), undef);
 
+my @buckets = sort $sl->buckets();
+is_deeply(\@buckets,
+    [ 'dt1', 'dt2', 'test10', 'test15', 'test20' ]
+);
+
 #
 use IO::File;
 

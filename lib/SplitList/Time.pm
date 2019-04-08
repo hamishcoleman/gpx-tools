@@ -95,6 +95,23 @@ sub lookup_bucket {
     return $self->_lookup_bucket($dt->epoch());
 }
 
+# Return a list of all possible bucket names
+sub buckets {
+    my $self = shift;
+
+    my %seen;
+    my @buckets;
+
+    for my $entry (@{$self->{entry}}) {
+        if (!defined ($seen{$entry})) {
+            push @buckets, $entry;
+        }
+        $seen{$entry} ++;
+    }
+
+    return @buckets;
+}
+
 sub parse_fd {
     my $self = shift;
     my $fd = shift;
