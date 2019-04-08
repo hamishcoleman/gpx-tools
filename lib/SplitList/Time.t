@@ -29,6 +29,11 @@ is($sl->{cache}{min}, 20, 'cache changed');
 is($sl->_lookup_bucket(21), 'test20', 'test20 (should use cache with no max ts)');
 is($sl->{cache}{min}, 20, 'cache didnt change');
 
+my @buckets = sort $sl->_lookup_timerange(16,21);
+is_deeply(\@buckets,
+    [ 'test15', 'test20' ]
+);
+
 # two identical times, with different zones - to confirm the zones are working
 is($sl->add_split('2017-02-02T01:00:00+10','dt1'), 1);
 is($sl->{cache}{min}, undef, 'cache cleared by add_split');
@@ -41,7 +46,7 @@ is($sl->lookup_bucket('2017-02-02T02:00:00Z'), 'dt2');
 # an unparseable time string
 is($sl->add_split('enotatime','foo'), undef);
 
-my @buckets = sort $sl->buckets();
+@buckets = sort $sl->buckets();
 is_deeply(\@buckets,
     [ 'dt1', 'dt2', 'test10', 'test15', 'test20' ]
 );

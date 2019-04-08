@@ -95,6 +95,27 @@ sub lookup_bucket {
     return $self->_lookup_bucket($dt->epoch());
 }
 
+# Return a list of buckets within the given timerange
+sub _lookup_timerange {
+    my $self = shift;
+    my $timestamp1 = shift;
+    my $timestamp2 = shift;
+
+    my %seen;
+    my @buckets;
+
+    my $idx1 = lastidx { $_ <= $timestamp1 } @{$self->{index}};
+    my $idx2 = lastidx { $_ < $timestamp2 } @{$self->{index}};
+
+    for my $entry (@{$self->{entry}}[$idx1..$idx2]) {
+        if (!defined ($seen{$entry})) {
+            push @buckets, $entry;
+        }
+        $seen{$entry} ++;
+    }
+    return @buckets;
+}
+
 # Return a list of all possible bucket names
 sub buckets {
     my $self = shift;
