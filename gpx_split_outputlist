@@ -1,0 +1,23 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+#
+# Create a list of all the possible output files from the given splitlist
+#
+
+use File::Spec;
+
+# allow the libs to be in the bin dir
+use FindBin;
+use lib File::Spec->catdir($FindBin::RealBin,"lib");
+
+use IO::File;
+
+use SplitList::Time;
+
+my $splitlist = SplitList::Time->new();
+my $split_filename = shift @ARGV;
+my $split_fh = IO::File->new($split_filename, "r");
+$splitlist->parse_fd($split_fh);
+
+print( join("\n", $splitlist->buckets()), "\n");

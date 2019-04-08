@@ -7,6 +7,9 @@ gpx_split
     This can be used to split daily gps log files into the "trips" they are
     part of.
 
+gpx_split_outputlist
+    Reads a "splitlist" file and generates the list of possible output names.
+
 gpx_minmax
     For the given input files, generate a summary of the min and max
     timestamps seen.
