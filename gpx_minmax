@@ -61,10 +61,10 @@ for my $file (@ARGV) {
     );
     $twig->parse($fh);
 
-    printf("%s %s - %s\n",
-        $file,
+    printf("%s - %s %s\n",
         $min,
         $max,
+        $file,
     );
 }
 
