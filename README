@@ -4,6 +4,8 @@ collection of GPX files.
 gpx_split
     Given a "splitlist" file and a list of GPX files, split the input into
     multiple output files.
+    Optionally, a filter argument can be given to request that only one of
+    the buckets from the splitlist is output and that it is output on stdout.
     This can be used to split daily gps log files into the "trips" they are
     part of.
 

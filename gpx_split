@@ -17,16 +17,33 @@ use IO::File;
 use SplitList::Time;
 use GPX::Files;
 
+use HC::Common;
+my $option = {
+};
+my @option_list = (
+    "splitlist=s",
+    "filter|f=s",
+);
+HC::Common::do_options($option,@option_list);
+exit if (defined($option->{help}));
+
+if (!defined($option->{splitlist})) {
+    $option->{splitlist} = shift @ARGV;
+}
+
 my $splitlist = SplitList::Time->new();
-my $split_filename = shift @ARGV;
-my $split_fh = IO::File->new($split_filename, "r");
+my $split_fh = IO::File->new($option->{splitlist}, "r");
 $splitlist->parse_fd($split_fh);
 
 my $gpxfiles = GPX::Files->new();
 $gpxfiles->set_splitlist($splitlist);
 
+if (defined($option->{filter})) {
+    $gpxfiles->set_filter2console($option->{filter});
+}
+
 for my $file (@ARGV) {
-    printf("file: %s\n",$file);
+    printf(STDERR "file: %s\n",$file);
 
     my $fh;
     if ( $file =~ m/\.gz$/ ) {

@@ -8,6 +8,14 @@ use strict;
 # case of trkpt events, perform a splitlist lookup and send to just one
 # of the objects
 
+# TODO
+# - the current filtering is a hack.
+#   instead, a bucket name to output filehandle hash should be given to
+#   the object, which allows the caller to manage the destination for
+#   all the output, and buckets without an entry in the hash could just
+#   be filtered.
+#   it would also allow tests to be written for the _open function.
+
 use IO::File;
 use GPX;
 
@@ -27,8 +35,16 @@ sub _open {
         return $self->{gpx}{$gpxname};
     }
 
+    # TODO
+    # - stdout hack should go as part of filtering
+    my $fh;
+    if ($gpxname eq '-') {
+        $fh = *STDOUT;
+    } else {
+        $fh = IO::File->new($gpxname,"w");
+    }
+
     my $gpx = GPX->new();
-    my $fh = IO::File->new($gpxname,"w");
     $gpx->output_file($fh);
 
     $self->{gpx}{$gpxname} = $gpx;
@@ -39,6 +55,14 @@ sub set_splitlist {
     my $self = shift;
     $self->{splitlist} = shift;
     return $self->{splitlist};
+}
+
+# TODO
+# - filtering should be replaced
+sub set_filter2console {
+    my $self = shift;
+    $self->{filter2console} = shift;
+    return $self->{filter2console};
 }
 
 sub add_trkseg {
@@ -94,15 +118,30 @@ sub add_trkpt {
         $gpxname = "__NONE.gpx";
     }
 
-    my $gpx = $self->_open($gpxname);
+    my $gpx;
+    # TODO
+    # - filtering should be replaced
+    if (defined($self->{filter2console})) {
+        if ($gpxname eq $self->{filter2console}) {
+            $gpx = $self->_open('-');
+        } else {
+            $gpx = undef;
+        }
+    } else {
+        $gpx = $self->_open($gpxname);
+    }
 
     if (defined($self->{prev_gpxname}) and $self->{prev_gpxname} ne $gpxname) {
-        $self->{prev_gpx}->close_trkseg();
+        if (defined($self->{prev_gpx})) {
+            $self->{prev_gpx}->close_trkseg();
+        }
     }
     $self->{prev_gpxname} = $gpxname;
     $self->{prev_gpx} = $gpx;
 
-    $gpx->add_trkpt($elt);
+    if (defined($gpx)) {
+        $gpx->add_trkpt($elt);
+    }
 }
 
 1;
