@@ -224,17 +224,23 @@ sub output_file {
 sub add_trk_name {
     my ($self, $elt) = @_;
 
+    return if (!defined($self->{fh}));
+
     $self->{fh}->print($self->_add_trk_name($elt->text()));
 }
 
 sub add_trkseg {
     my ($self, $elt) = @_;
 
+    return if (!defined($self->{fh}));
+
     $self->{fh}->print($self->_add_trkseg());
 }
 
 sub add_trkpt {
     my ($self, $elt) = @_;
+
+    return if (!defined($self->{fh}));
 
     my $ele_text;
     my $ele = $elt->first_child('ele');
@@ -259,11 +265,15 @@ sub add_trkpt {
 sub close_trkseg {
     my ($self, $elt) = @_;
 
+    return if (!defined($self->{fh}));
+
     $self->{fh}->print($self->_close_trkseg());
 }
 
 sub flush {
     my ($self) = @_;
+
+    return if (!defined($self->{fh}));
 
     $self->{fh}->print($self->_flush());
 }
