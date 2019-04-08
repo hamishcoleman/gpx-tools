@@ -1,0 +1,71 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+#
+# For each input file, determine the first and last timestamp track point
+#
+
+use File::Spec;
+
+# allow the libs to be in the bin dir
+use FindBin;
+use lib File::Spec->catdir($FindBin::RealBin,"lib");
+
+use XML::Twig;
+use IO::File;
+
+# FIXME - globals
+my $min;
+my $max;
+
+sub add_trkpt {
+    my $elt = shift;
+
+    my $time_elt = $elt->first_child('time');
+    if (!defined($time_elt)) {
+        return;
+    }
+
+    my $time = $time_elt->text();
+
+    if (!defined($max) || $time gt $max) {
+        $max = $time;
+    }
+    if (!defined($min) || $time lt $min) {
+        $min = $time;
+    }
+}
+
+for my $file (@ARGV) {
+    $min = undef;
+    $max = undef;
+
+    my $fh;
+    if ( $file =~ m/\.gz$/ ) {
+        $fh = IO::File->new("gzip -dc <'$file' |");
+    } elsif ( $file =~ m/\.xz$/ ) {
+        $fh = IO::File->new("xz -dc <'$file' |");
+    } else {
+        $fh = IO::File->new($file,"r");
+    }
+    if (!defined $fh) {
+        die "could not open $file: $!";
+    }
+
+    my $twig = XML::Twig->new(
+            twig_handlers => {
+                trkpt => sub {
+                    add_trkpt($_[1]);
+                },
+            },
+    );
+    $twig->parse($fh);
+
+    printf("%s %s - %s\n",
+        $file,
+        $min,
+        $max,
+    );
+}
+
+
