@@ -1,0 +1,9 @@
+image: debian:stable
+
+before_script:
+    - apt update
+    - make build_dep
+
+test:
+    script:
+        - make test
