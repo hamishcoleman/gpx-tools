@@ -43,6 +43,12 @@ is($sl->lookup_bucket('2017-02-01T14:00:00Z'), 'test20');
 is($sl->lookup_bucket('2017-02-01T15:00:00Z'), 'dt1');
 is($sl->lookup_bucket('2017-02-02T02:00:00Z'), 'dt2');
 
+@buckets = sort $sl->lookup_timerange('1970-01-01T00:00:16Z','2017-02-02T01:00:01+10');
+is_deeply(\@buckets,
+    [ 'dt1', 'test15', 'test20' ]
+);
+
+
 # an unparseable time string
 is($sl->add_split('enotatime','foo'), undef);
 

@@ -116,6 +116,19 @@ sub _lookup_timerange {
     return @buckets;
 }
 
+sub lookup_timerange {
+    my $self = shift;
+    my $timestamp1_str = shift;
+    my $timestamp2_str = shift;
+
+    my $dt1 = HC::Strptime->format()->parse_datetime($timestamp1_str);
+    return undef if (!defined($dt1));
+    my $dt2 = HC::Strptime->format()->parse_datetime($timestamp2_str);
+    return undef if (!defined($dt2));
+
+    return $self->_lookup_timerange($dt1->epoch(),$dt2->epoch());
+}
+
 # Return a list of all possible bucket names
 sub buckets {
     my $self = shift;
