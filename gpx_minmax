@@ -61,11 +61,14 @@ for my $file (@ARGV) {
     );
     $twig->parse($fh);
 
-    printf("%s - %s %s\n",
-        $min,
-        $max,
-        $file,
-    );
+    if (defined($min) && defined($max)) {
+        printf("%s - %s %s\n",
+            $min,
+            $max,
+            $file,
+        );
+    } else {
+        warn("Either min or max is undefined in $file\n");
+        # TODO - exit with an error code?
+    }
 }
-
-
