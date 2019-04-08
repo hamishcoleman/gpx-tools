@@ -1,0 +1,71 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+#
+# Load a splitlist and a series of min/max files, output the dependancy list
+# of which minmax source files are needed for each splitlist output bucket
+#
+
+use File::Spec;
+
+# allow the libs to be in the bin dir
+use FindBin;
+use lib File::Spec->catdir($FindBin::RealBin,"lib");
+
+use IO::File;
+
+use SplitList::Time;
+
+my $splitlist = SplitList::Time->new();
+my $split_filename = shift @ARGV;
+my $split_fh = IO::File->new($split_filename, "r");
+$splitlist->parse_fd($split_fh);
+
+my $deps = {};
+
+for my $file (@ARGV) {
+    my $fh;
+    if ( $file =~ m/\.gz$/ ) {
+        $fh = IO::File->new("gzip -dc <'$file' |");
+    } elsif ( $file =~ m/\.xz$/ ) {
+        $fh = IO::File->new("xz -dc <'$file' |");
+    } else {
+        $fh = IO::File->new($file,"r");
+    }
+    if (!defined $fh) {
+        die "could not open $file: $!";
+    }
+
+    my $s = <$fh>;
+
+    # skip empty files (TODO: read more lines?)
+    next if (!$s);
+
+    chomp($s);
+
+    if ($s =~ m/^(\S+) - (\S+) (.*)$/) {
+        my $min = $1;
+        my $max = $2;
+        my $input = $3;
+
+        my @buckets = $splitlist->lookup_timerange($min,$max);
+
+        # if debug
+        #   printf("minmax file: %s\n",$file);
+        #   print("\t", join(", ", @buckets), "\n");
+   
+        for my $output (@buckets) {
+            push @{$deps->{$output}}, $input;
+        }
+    } else {
+        warn("Could not read $file\n");
+    }
+}
+
+print("# Automatically generated dependancy list\n");
+for my $output (sort(keys(%{$deps}))) {
+    printf("%s: %s\n",
+        $output,
+        join(" ", @{$deps->{$output}}),
+    );
+}

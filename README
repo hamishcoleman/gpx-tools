@@ -14,3 +14,7 @@ gpx_minmax
     For the given input files, generate a summary of the min and max
     timestamps seen.
     These summaries can be used as an index to speed up search operations.
+
+gpx_split_deps
+    Create a makefile compatible dependancy list by reading a splitlist and
+    a series of minmax files.
