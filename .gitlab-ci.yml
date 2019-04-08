@@ -1,7 +1,8 @@
 image: debian:stable
 
 before_script:
-    - apt update
+    - apt-get update
+    - apt-get install -y make
     - make build_dep
 
 test:
