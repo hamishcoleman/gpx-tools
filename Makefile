@@ -17,7 +17,7 @@ PACKAGES := libxml-twig-perl libtext-csv-perl libdevel-cover-perl
 PACKAGES += libio-string-perl
 
 build_dep:
-	apt install $(PACKAGES)
+	apt-get install -y $(PACKAGES)
 
 install: clean
 	mkdir -p $(INSTALLBIN)
