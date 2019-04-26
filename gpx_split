@@ -70,6 +70,8 @@ for my $file (@ARGV) {
             },
     );
     $twig->parse($fh);
+    # TODO:
+    # - something less verbose - but still fatal - if we fail to read the xml
 }
 
 $gpxfiles->flush();
