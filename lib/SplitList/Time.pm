@@ -150,6 +150,11 @@ sub parse_fd {
     my $self = shift;
     my $fd = shift;
 
+    if (!defined($fd)) {
+        # We have been handed a file handle that is not useful
+        return undef;
+    }
+
     my $prev_line;
     while(<$fd>) {
         s/#.*//; # comments
