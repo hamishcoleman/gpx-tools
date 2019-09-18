@@ -12,4 +12,6 @@ before_script:
 
 script:
     - make cover
+
+after_success:
     - cover -report codecov
