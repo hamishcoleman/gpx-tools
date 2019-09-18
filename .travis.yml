@@ -8,6 +8,7 @@ language: minimal
 before_script:
     - sudo apt-get update
     - sudo make build_dep
+    - sudo apt-get install -y cpanminus
     - sudo cpanm --quiet --notest --skip-satisfied Devel::Cover::Report::Codecov
 
 script:
