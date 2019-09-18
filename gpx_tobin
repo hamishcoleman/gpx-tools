@@ -1,0 +1,100 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+#
+# Read GPX, output binary representation
+# - use to experiment with file sizes and different compression types
+#
+# current results are:
+# - if using doubles for lat/long, the 'xz -9' version of the binary is almost
+#   the same size as simply using 'xz -9' on the gpx
+# - if using floats, the xz bin version is less than half the size
+#
+
+use File::Spec;
+
+# allow the libs to be in the bin dir
+use FindBin;
+use lib File::Spec->catdir($FindBin::RealBin,"lib");
+
+use XML::Twig;
+use IO::File;
+
+use HC::Strptime;
+
+sub add_trkseg {
+    my $elt = shift;
+
+    print("s");
+}
+
+sub add_trkpt {
+    my $elt = shift;
+
+    my $time_elt = $elt->first_child('time');
+    if (!defined($time_elt)) {
+        ...;
+    }
+
+    my $time = HC::Strptime->format()->parse_datetime($time_elt->text())->epoch();
+    my $lat = $elt->{'att'}->{'lat'};
+    my $lon = $elt->{'att'}->{'lon'};
+
+    my $ele_elt = $elt->first_child('ele');
+    if (!defined($ele_elt)) {
+        ...;
+    }
+    my $ele = $ele_elt->text();
+
+
+    print(pack('AQ>d>d>i>A3', 'p', $time, $lat, $lon, $ele, 'PAD'));
+
+# TODO - extract the temparature from gpxtpx:atemp
+#      <trkpt
+#          lat="0.1"
+#          lon="1.0">
+#        <ele>2.06</ele>
+#        <time>2000-01-01T01:01:01Z</time>
+#        <extensions>
+#          <gpxtpx:TrackPointExtension>
+#            <gpxtpx:atemp>29.1</gpxtpx:atemp>
+#          </gpxtpx:TrackPointExtension>
+#
+#    my $temp = 255;
+#    my $temp_elt = $elt->first_child('gpxtpx:atemp');
+#    if (defined($temp_elt)) {
+#        $temp = temp_elt->text();
+#    }
+}
+
+for my $file (@ARGV) {
+
+    my $basefilename;
+
+    my $fh;
+    if ( $file =~ m/\.gz$/ ) {
+        $fh = IO::File->new("gzip -dc <'$file' |");
+        $basefilename = substr($file,0,-3);
+    } elsif ( $file =~ m/\.xz$/ ) {
+        $fh = IO::File->new("xz -dc <'$file' |");
+        $basefilename = substr($file,0,-3);
+    } else {
+        $fh = IO::File->new($file,"r");
+        $basefilename = $file;
+    }
+    if (!defined $fh) {
+        die "could not open $file: $!";
+    }
+
+    my $twig = XML::Twig->new(
+            twig_handlers => {
+                trkseg => sub {
+                    add_trkseg($_[1]);
+                },
+                trkpt => sub {
+                    add_trkpt($_[1]);
+                },
+            },
+    );
+    $twig->parse($fh);
+}
