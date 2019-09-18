@@ -5,7 +5,7 @@ language: perl
 # the local Devel::Cover html report.
 #
 before_script:
-    - apt-get install -y libdevel-cover-perl
+    - sudo apt-get install -y libdevel-cover-perl
     - cpanm --quiet --notest --skip-satisfied Devel::Cover::Report::Codecov
 
 script:
