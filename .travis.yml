@@ -5,6 +5,7 @@ language: minimal
 # the local Devel::Cover html report.
 #
 before_script:
+    - sudo apt-get update
     - sudo make build_dep
 
 script:
