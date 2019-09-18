@@ -50,7 +50,10 @@ sub add_split {
     my $entry = shift;
 
     my $dt = HC::Strptime->format()->parse_datetime($timestamp_str);
-    return undef if (!defined($dt));
+    if (!defined($dt)) {
+        warn("Could not parse datetime $timestamp_str");
+        return undef;
+    }
 
     return $self->_add_split($dt->epoch(),$entry);
 }
