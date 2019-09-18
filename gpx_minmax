@@ -40,13 +40,18 @@ for my $file (@ARGV) {
     $min = undef;
     $max = undef;
 
+    my $basefilename;
+
     my $fh;
     if ( $file =~ m/\.gz$/ ) {
         $fh = IO::File->new("gzip -dc <'$file' |");
+        $basefilename = substr($file,0,-3);
     } elsif ( $file =~ m/\.xz$/ ) {
         $fh = IO::File->new("xz -dc <'$file' |");
+        $basefilename = substr($file,0,-3);
     } else {
         $fh = IO::File->new($file,"r");
+        $basefilename = $file;
     }
     if (!defined $fh) {
         die "could not open $file: $!";
@@ -61,11 +66,14 @@ for my $file (@ARGV) {
     );
     $twig->parse($fh);
 
+    # Extract just the final path component
+    (undef, undef, $basefilename) = File::Spec->splitpath( $basefilename );
+
     if (defined($min) && defined($max)) {
         printf("%s - %s %s\n",
             $min,
             $max,
-            $file,
+            $basefilename,
         );
     } else {
         warn("Either min or max is undefined in $file\n");

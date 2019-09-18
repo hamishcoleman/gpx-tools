@@ -16,6 +16,47 @@ use IO::File;
 
 use SplitList::Time;
 
+# TODO - use getopt to parse cmdline
+# Extract any search path
+my @path;
+if ($ARGV[0] =~ m/^--path=(.*)/) {
+    shift @ARGV;
+    for my $entry (split(':',$1)) {
+        # ensure we resolve any home directory tilde expansions
+        push @path, glob($entry);
+    }
+} else {
+    push @path, ".";
+}
+
+# Given the base filename, look on the search path for a
+# matching real filename and output that.
+# die on failure
+sub findfile {
+    my $basefilename = shift;
+
+    if (File::Spec->file_name_is_absolute($basefilename)) {
+        # obsolete - full path name
+        if ( -e $basefilename ) {
+            return $basefilename;
+        }
+    }
+
+    for my $path (@path) {
+        my $tryname = File::Spec->catfile($path,$basefilename);
+        if ( -e $tryname ) {
+            return $tryname;
+        }
+        $tryname .= '.xz';
+        if ( -e $tryname ) {
+            return $tryname;
+        }
+    }
+
+    die("Could not find $basefilename in @path");
+}
+
+
 my $splitlist = SplitList::Time->new();
 my $split_filename = shift @ARGV;
 my $split_fh = IO::File->new($split_filename, "r");
@@ -46,7 +87,9 @@ for my $file (@ARGV) {
     if ($s =~ m/^(\S+) - (\S+) (.*)$/) {
         my $min = $1;
         my $max = $2;
-        my $input = $3;
+        my $basefilename = $3;
+
+        my $inputfilename = findfile($basefilename);
 
         my @buckets = $splitlist->lookup_timerange($min,$max);
 
@@ -55,7 +98,7 @@ for my $file (@ARGV) {
         #   print("\t", join(", ", @buckets), "\n");
    
         for my $output (@buckets) {
-            push @{$deps->{$output}}, $input;
+            push @{$deps->{$output}}, $inputfilename;
         }
     } else {
         warn("Could not read $file\n");
