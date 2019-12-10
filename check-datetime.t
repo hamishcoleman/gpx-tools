@@ -16,7 +16,9 @@ isa_ok($parser->parse_datetime('2017-02-01T14:00:00Z'), 'DateTime');
 # Not working:
 #  libdatetime-format-strptime-perl 1.5600-1
 #  libdatetime-format-strptime-perl 1.6200-1
+#  libdatetime-format-strptime-perl 1.6800-1
 #
 # Working:
 #  libdatetime-format-strptime-perl 1.7500-1
+#  libdatetime-format-strptime-perl 1.7600-1
 #
