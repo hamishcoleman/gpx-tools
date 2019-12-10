@@ -42,6 +42,10 @@ if (defined($option->{filter})) {
     $gpxfiles->set_filter2console($option->{filter});
 }
 
+if (scalar(@ARGV)==0) {
+    die("No gpx files - is the splitlist right? or is the timespan empty?");
+}
+
 for my $file (@ARGV) {
     printf(STDERR "file: %s\n",$file);
 
