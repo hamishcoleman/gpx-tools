@@ -51,6 +51,12 @@ sub findfile {
         if ( -e $tryname ) {
             return $tryname;
         }
+
+        # If the file is in a git-annex, then the filename exists but the
+        # content might not exist
+        if ( -l $tryname ) {
+            return $tryname;
+        }
     }
 
     die("Could not find $basefilename in @path");
