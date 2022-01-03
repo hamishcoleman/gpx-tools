@@ -10,8 +10,7 @@ INSTALLLIB := $(INSTALLROOT)/usr/local/lib/site_perl
 describe := $(shell git describe --always --dirty)
 tarfile := $(NAME)-$(describe).tar.gz
 
-all:
-	test
+all: test
 
 PACKAGES := libxml-twig-perl libtext-csv-perl libdevel-cover-perl
 PACKAGES += libio-string-perl
