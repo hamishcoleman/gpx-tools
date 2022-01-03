@@ -11,6 +11,7 @@ describe := $(shell git describe --always --dirty)
 tarfile := $(NAME)-$(describe).tar.gz
 
 all: test
+	@echo No compile is needed, only tests were run
 
 PACKAGES := libxml-twig-perl libtext-csv-perl libdevel-cover-perl
 PACKAGES += libio-string-perl
